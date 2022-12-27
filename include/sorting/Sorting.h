@@ -1,0 +1,176 @@
+#pragma once
+
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <utility>
+
+namespace sorting
+{
+
+// State required for sporadic, RESTful client-server-type sorting.
+struct QuickSortState
+{
+    // Number of elements in the sortable array
+    uint32_t n;
+    // Sortable array
+    std::vector<uint32_t> arr;
+    // Auxiliary stack for iterative quick sort
+    std::vector<uint32_t> stack;
+    // Index of the top of the stack
+    uint32_t top;
+    // Current parition pivot element
+    uint32_t p;
+    // Current partition leftmost element
+    uint32_t i;
+    // Current partition rightmost element
+    uint32_t j;
+};
+
+inline bool validateState(const QuickSortState& state)
+{
+    if (state.n == 0 || state.arr.size() != state.n | state.stack.size() != state.n)
+    {
+        return false;
+    }
+    return true;
+}
+
+// Persist the sorting state to disk. Reports success status.
+inline bool persistStateToDisk(const std::string& filename, const QuickSortState& state)
+{
+    std::ofstream f(filename);
+    if (!f)
+    {
+        return false;
+    }
+    if (!validateState(state))
+    {
+        return false;
+    }
+
+    f.write((char*)&state.n, sizeof(uint32_t));
+    for (size_t i = 0; i < state.arr.size(); i++)
+    {
+        f.write((char*)&state.arr[i], sizeof(uint32_t));
+    }
+    for (size_t i = 0; i < state.stack.size(); i++)
+    {
+        f.write((char*)&state.stack[i], sizeof(uint32_t));
+    }
+    f.write((char*)&state.top, sizeof(uint32_t));
+    f.write((char*)&state.p, sizeof(uint32_t));
+    f.write((char*)&state.i, sizeof(uint32_t));
+    f.write((char*)&state.j, sizeof(uint32_t));
+
+    f.close();
+
+    return true;
+}
+
+// Recover the sorting state from disk. Reports success status.
+inline std::pair<bool, QuickSortState> sortStateFromDisk(const std::string& filename)
+{
+    QuickSortState state;
+    std::ifstream  f(filename);
+    if (!f)
+    {
+        return {false, state};
+    }
+
+    uint32_t read;
+    f.read((char*)&read, sizeof(uint32_t));
+    if (!f.fail())
+    {
+        state.n = read;
+    }
+    else
+    {
+        return {false, state};
+    }
+    if (state.n == 0)
+    {
+        return {false, state};
+    }
+    for (size_t i = 0; i < state.n; i++)
+    {
+        f.read((char*)&read, sizeof(uint32_t));
+        if (!f.fail())
+        {
+            state.arr.push_back(read);
+        }
+        else
+        {
+            return {false, state};
+        }
+    }
+    for (size_t i = 0; i < state.n; i++)
+    {
+        f.read((char*)&read, sizeof(uint32_t));
+        if (!f.fail())
+        {
+            state.stack.push_back(read);
+        }
+        else
+        {
+            return {false, state};
+        }
+    }
+    f.read((char*)&read, sizeof(uint32_t));
+    if (!f.fail())
+    {
+        state.top = read;
+    }
+    else
+    {
+        return {false, state};
+    }
+    f.read((char*)&read, sizeof(uint32_t));
+    if (!f.fail())
+    {
+        state.p = read;
+    }
+    else
+    {
+        return {false, state};
+    }
+    f.read((char*)&read, sizeof(uint32_t));
+    if (!f.fail())
+    {
+        state.i = read;
+    }
+    else
+    {
+        return {false, state};
+    }
+    f.read((char*)&read, sizeof(uint32_t));
+    if (!f.fail())
+    {
+        state.j = read;
+    }
+    else
+    {
+        return {false, state};
+    }
+
+    return {true, state};
+}
+
+// RESTful Randomized Quick Sort with a client-side comparator.
+// All necessary state information is contained in the SortState
+// input, and the updated sort state is reflected in the output.
+// Reports success status.
+inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSortState& currentState)
+{
+    if (!validateState(currentState))
+    {
+        return {false, currentState};
+    }
+
+    // TODO
+
+    return {true, currentState};
+}
+
+} // namespace sorting
