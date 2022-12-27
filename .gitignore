@@ -1,4 +1,5 @@
 .vscode/*
 build/*
 *.nix
-result/*
+result
+TMP*
