@@ -26,6 +26,13 @@ struct QuickSortState
     uint32_t i;
     // Current partition rightmost element
     uint32_t j;
+    // Current left input to client comparator
+    uint32_t l;
+    // Current right input to client comparator
+    uint32_t r;
+    // Current output of the client comparator given (l, r)
+    // 0: NOT COMPARED; 1: l > r; 2: r > l; 3: r = l
+    uint32_t c;
 };
 
 inline bool validateState(const QuickSortState& state)
@@ -63,6 +70,9 @@ inline bool persistStateToDisk(const std::string& filename, const QuickSortState
     f.write((char*)&state.p, sizeof(uint32_t));
     f.write((char*)&state.i, sizeof(uint32_t));
     f.write((char*)&state.j, sizeof(uint32_t));
+    f.write((char*)&state.l, sizeof(uint32_t));
+    f.write((char*)&state.r, sizeof(uint32_t));
+    f.write((char*)&state.c, sizeof(uint32_t));
 
     f.close();
 
@@ -153,6 +163,33 @@ inline std::pair<bool, QuickSortState> sortStateFromDisk(const std::string& file
     {
         return {false, state};
     }
+    f.read((char*)&read, sizeof(uint32_t));
+    if (!f.fail())
+    {
+        state.l = read;
+    }
+    else
+    {
+        return {false, state};
+    }
+    f.read((char*)&read, sizeof(uint32_t));
+    if (!f.fail())
+    {
+        state.r = read;
+    }
+    else
+    {
+        return {false, state};
+    }
+    f.read((char*)&read, sizeof(uint32_t));
+    if (!f.fail())
+    {
+        state.c = read;
+    }
+    else
+    {
+        return {false, state};
+    }
 
     return {true, state};
 }
@@ -160,17 +197,25 @@ inline std::pair<bool, QuickSortState> sortStateFromDisk(const std::string& file
 // RESTful Randomized Quick Sort with a client-side comparator.
 // All necessary state information is contained in the SortState
 // input, and the updated sort state is reflected in the output.
-// Reports success status.
+// The input state should contain a comparator output value (unless
+// it's the first iteration: top = 0) and the output state should
+// contain updated comparator inputs (unless sorting is complete:
+// top = 0). Reports success status.
 inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSortState& currentState)
 {
-    if (!validateState(currentState))
+    QuickSortState state = currentState;
+    if (!validateState(state))
     {
-        return {false, currentState};
+        return {false, state};
+    }
+    if (state.top > 0 && state.c == 0)
+    {
+        return {false, state};
     }
 
     // TODO
 
-    return {true, currentState};
+    return {true, state};
 }
 
 } // namespace sorting

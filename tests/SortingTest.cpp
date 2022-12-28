@@ -17,6 +17,9 @@ BOOST_AUTO_TEST_CASE(TestPersistence)
     state.p   = 8;
     state.i   = 0;
     state.j   = 1;
+    state.l   = 2;
+    state.r   = 3;
+    state.c   = 1;
     BOOST_CHECK(sorting::persistStateToDisk("sort_state.log", state));
     BOOST_CHECK(!sorting::sortStateFromDisk("fake_log.log").first);
     auto [read_success, state2] = sorting::sortStateFromDisk("sort_state.log");
@@ -30,6 +33,9 @@ BOOST_AUTO_TEST_CASE(TestPersistence)
     BOOST_CHECK_EQUAL(state.p, state2.p);
     BOOST_CHECK_EQUAL(state.i, state2.i);
     BOOST_CHECK_EQUAL(state.j, state2.j);
+    BOOST_CHECK_EQUAL(state.l, state2.l);
+    BOOST_CHECK_EQUAL(state.r, state2.r);
+    BOOST_CHECK_EQUAL(state.c, state2.c);
 }
 
 BOOST_AUTO_TEST_CASE(TestIncrementalSorting)
