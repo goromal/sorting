@@ -1,5 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "sorting/Sorting.h"
+#include <limits>
+#include <map>
 
 BOOST_AUTO_TEST_SUITE(TestSorting)
 
@@ -36,9 +38,55 @@ BOOST_AUTO_TEST_CASE(TestPersistence)
     BOOST_CHECK_EQUAL(state.c, state2.c);
 }
 
-BOOST_AUTO_TEST_CASE(TestIncrementalSorting)
+BOOST_AUTO_TEST_CASE(TestIncrementalSortingShort)
 {
-    // TODO
+    std::map<uint32_t, double> values  = {{0, 4.8}, {1, 10.0}, {2, 1.0}, {3, 2.5}, {4, 5.0}};
+    std::vector<uint32_t>      indices = {0, 1, 2, 3, 4};
+    std::vector<uint32_t>      stack(5, 0);
+
+    sorting::QuickSortState state;
+    state.n     = 5;
+    state.arr   = indices;
+    state.stack = stack;
+
+    auto updateComparator = [](const double& a, const double& b) {
+        if (a < b)
+        {
+            return sorting::LEFT_LESS;
+        }
+        else if (a > b)
+        {
+            return sorting::LEFT_GREATER;
+        }
+        else
+        {
+            return sorting::LEFT_EQUAL;
+        }
+    };
+
+    uint64_t       iter     = 0;
+    const uint64_t maxIters = 50;
+    while (!(state.top == std::numeric_limits<uint32_t>::max() && state.c != 0) && iter < maxIters)
+    {
+        auto [iter_success, state_out] = sorting::restfulRandomizedQuickSort(state);
+        BOOST_CHECK(iter_success);
+        state = state_out;
+        if (state.l == sorting::LEFT_I)
+        {
+            state.c = updateComparator(values[state.arr[state.i]], values[state.arr[state.p]]);
+        }
+        else if (state.l == sorting::LEFT_J)
+        {
+            state.c = updateComparator(values[state.arr[state.j]], values[state.arr[state.p]]);
+        }
+        iter++;
+    }
+
+    BOOST_CHECK_EQUAL(state.arr[0], 2);
+    BOOST_CHECK_EQUAL(state.arr[1], 3);
+    BOOST_CHECK_EQUAL(state.arr[2], 0);
+    BOOST_CHECK_EQUAL(state.arr[3], 4);
+    BOOST_CHECK_EQUAL(state.arr[4], 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

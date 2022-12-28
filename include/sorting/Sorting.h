@@ -30,7 +30,7 @@ struct QuickSortState
     uint32_t j;
     // Current left input to client comparator (right input is the pivot)
     // 0: i; 1: j
-    uint32_t l;
+    uint32_t l = 0;
     // Current output of the client comparator given (l, r)
     // 0: NOT COMPARED; 1: l < p; 2: l > p; 3: l = p
     uint32_t c = 0;
@@ -196,15 +196,14 @@ inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSor
 
     // Randomized partition generator
     static auto randomizedPartition = [](const uint32_t& low, const uint32_t& high) {
-        srand(time(NULL));
         return low + rand() % (high - low);
     };
 
     // Element swapper
     static auto swap = [](std::vector<uint32_t>& arr, const uint32_t& i, const uint32_t& j) {
-        auto tmp = arr[i];
-        arr[i]   = arr[j];
-        arr[j]   = tmp;
+        uint32_t tmp = arr[i];
+        arr[i]       = arr[j];
+        arr[j]       = tmp;
     };
 
     // Partition reset from top of the stack
@@ -217,7 +216,7 @@ inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSor
 
         s.p = l;
         s.i = l;
-        s.j = h + 1;
+        s.j = h;
 
         s.l = LEFT_J;
         s.c = NOT_COMPARED;
@@ -264,7 +263,7 @@ inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSor
                 auto p = state.j;
                 auto h = state.stack[state.top--];
                 auto l = state.stack[state.top--];
-                if (p - 1 > l)
+                if (p != 0 && p - 1 > l)
                 {
                     state.stack[++state.top] = l;
                     state.stack[++state.top] = p - 1;
@@ -276,7 +275,7 @@ inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSor
                 }
                 if (state.top == std::numeric_limits<uint32_t>::max())
                 {
-                    return {true, state}; // algorithm finished
+                    return {true, state}; // sorting complete
                 }
                 else
                 {
