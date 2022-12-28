@@ -191,6 +191,8 @@ inline std::pair<bool, QuickSortState> sortStateFromDisk(const std::string& file
         return {false, state};
     }
 
+    f.close();
+
     return {true, state};
 }
 
