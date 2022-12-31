@@ -283,7 +283,7 @@ inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSor
                 }
                 if (state.top == std::numeric_limits<uint32_t>::max())
                 {
-                    state.sorted = true; // sorting complete
+                    state.sorted = 1; // sorting complete
                     return {true, state};
                 }
                 else
