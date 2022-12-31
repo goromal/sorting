@@ -242,7 +242,7 @@ inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSor
     // Continue with partitioning
     if (state.l == LEFT_I)
     {
-        if (state.c == LEFT_LESS)
+        if (state.c == LEFT_LESS && state.i < state.n - 1)
         {
             state.i++;
             state.c = NOT_COMPARED;
@@ -296,7 +296,10 @@ inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSor
             {
                 swap(state.arr, state.i, state.j);
                 state.l = LEFT_I;
-                state.i++;
+                if (state.i < state.n - 1)
+                {
+                    state.i++;
+                }
                 state.c = NOT_COMPARED;
                 return {true, state};
             }
