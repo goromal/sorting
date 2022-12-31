@@ -251,14 +251,17 @@ inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSor
         else
         {
             state.l = LEFT_J;
-            state.j--;
+            if (state.j > 0)
+            {
+                state.j--;
+            }
             state.c = NOT_COMPARED;
             return {true, state};
         }
     }
     else
     {
-        if (state.c == LEFT_GREATER)
+        if (state.c == LEFT_GREATER && state.j > 0)
         {
             state.j--;
             state.c = NOT_COMPARED;
