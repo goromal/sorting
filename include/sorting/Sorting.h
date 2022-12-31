@@ -14,6 +14,8 @@ namespace sorting
 // State required for sporadic, RESTful client-server-type sorting.
 struct QuickSortState
 {
+    // Whether the array is sorted (1) or not (0)
+    uint32_t sorted = 0;
     // Number of elements in the sortable array
     uint32_t n = 0;
     // Sortable array
@@ -87,6 +89,7 @@ inline bool persistStateToDisk(const std::string& filename, const QuickSortState
         return false;
     }
 
+    f.write((char*)&state.sorted, sizeof(uint32_t));
     f.write((char*)&state.n, sizeof(uint32_t));
     for (size_t i = 0; i < state.arr.size(); i++)
     {
@@ -132,6 +135,7 @@ inline std::pair<bool, QuickSortState> sortStateFromDisk(const std::string& file
     }
 
     uint32_t read;
+    _READ_STATE_FIELD(sorted)
     _READ_STATE_FIELD(n)
     if (state.n == 0)
     {
@@ -192,6 +196,10 @@ inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSor
     if (state.top < std::numeric_limits<uint32_t>::max() && state.c == NOT_COMPARED)
     {
         return {false, state};
+    }
+    if (state.sorted == 1)
+    {
+        return {true, state};
     }
 
     // Randomized partition generator
@@ -275,7 +283,8 @@ inline std::pair<bool, QuickSortState> restfulRandomizedQuickSort(const QuickSor
                 }
                 if (state.top == std::numeric_limits<uint32_t>::max())
                 {
-                    return {true, state}; // sorting complete
+                    state.sorted = true; // sorting complete
+                    return {true, state};
                 }
                 else
                 {
