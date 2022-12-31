@@ -177,6 +177,108 @@ inline std::pair<bool, QuickSortState> sortStateFromDisk(const std::string& file
     return {true, state};
 }
 
+// RESTful Deterministic Quick Sort with a client-side comparator.
+// All necessary state information is contained in the SortState
+// input, and the updated sort state is reflected in the output.
+// The input state should contain a comparator output value (unless
+// it's the first iteration: top = UINT32_MAX && c = 0) and the output
+// state should contain updated comparator inputs (unless sorting is
+// complete: top = UINT32_MAX). Reports success status.
+inline std::pair<bool, QuickSortState> restfulQuickSort(const QuickSortState& currentState)
+{
+    QuickSortState state = currentState;
+
+    // Reject invalid input states
+    if (!validateState(state))
+    {
+        return {false, state};
+    }
+    if (state.top < std::numeric_limits<uint32_t>::max() && state.c == NOT_COMPARED)
+    {
+        return {false, state};
+    }
+    if (state.sorted == 1)
+    {
+        return {true, state};
+    }
+
+    // Element swapper
+    static auto swap = [](std::vector<uint32_t>& arr, const uint32_t& i, const uint32_t& j) {
+        uint32_t tmp = arr[i];
+        arr[i]       = arr[j];
+        arr[j]       = tmp;
+    };
+
+    // Partition reset from top of the stack
+    static auto resetPartition = [](QuickSortState& s) {
+        auto h = s.stack[s.top];
+        auto l = s.stack[s.top - 1];
+
+        s.p = h;
+        s.i = l - 1;
+        s.j = l;
+
+        s.l = LEFT_J;
+        s.c = NOT_COMPARED;
+    };
+
+    // Algorithm initialization
+    if (state.top == std::numeric_limits<uint32_t>::max() && state.c == NOT_COMPARED)
+    {
+        state.stack[++state.top] = 0;           // low
+        state.stack[++state.top] = state.n - 1; // high
+        resetPartition(state);
+        return {true, state};
+    }
+
+    // Continue with partitioning
+    if (state.l == LEFT_J)
+    {
+        if ((state.c == LEFT_LESS || state.c == LEFT_EQUAL) && state.i < state.n - 1)
+        {
+            state.i++;
+            swap(state.arr, state.i, state.j);
+        }
+        if (state.j < state.p - 1)
+        {
+            state.j++;
+            state.c = NOT_COMPARED;
+            return {true, state};
+        }
+        else
+        {
+            swap(state.arr, state.i + 1, state.p);
+            auto p = state.i + 1;
+            auto h = state.stack[state.top--];
+            auto l = state.stack[state.top--];
+            if (p != 0 && p - 1 > l)
+            {
+                state.stack[++state.top] = l;
+                state.stack[++state.top] = p - 1;
+            }
+            if (p + 1 < h)
+            {
+                state.stack[++state.top] = p + 1;
+                state.stack[++state.top] = h;
+            }
+            if (state.top == std::numeric_limits<uint32_t>::max())
+            {
+                state.sorted = 1; // sorting complete
+                return {true, state};
+            }
+            else
+            {
+                resetPartition(state);
+                return {true, state};
+            }
+        }
+    }
+    else
+    {
+        return {false, state};
+    }
+}
+
 // RESTful Randomized Quick Sort with a client-side comparator.
 // All necessary state information is contained in the SortState
 // input, and the updated sort state is reflected in the output.

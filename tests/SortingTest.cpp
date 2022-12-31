@@ -69,6 +69,7 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingShort)
     while (!(state.top == std::numeric_limits<uint32_t>::max() && state.c != 0) && iter < maxIters)
     {
         auto [iter_success, state_out] = sorting::restfulRandomizedQuickSort(state);
+        // auto [iter_success, state_out] = sorting::restfulQuickSort(state);
         BOOST_CHECK(iter_success);
         state = state_out;
         if (state.l == sorting::LEFT_I)
@@ -106,7 +107,7 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingLong)
         }
     };
 
-    const uint32_t n = 50;
+    const uint32_t n = 20;
 
     std::vector<uint32_t> indices;
     for (uint32_t i = 0; i < n; i++)
@@ -125,7 +126,7 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingLong)
 
     while (!(state.top == std::numeric_limits<uint32_t>::max() && state.c != 0) && iter < maxIters)
     {
-        auto [iter_success, state_out] = sorting::restfulRandomizedQuickSort(state);
+        auto [iter_success, state_out] = sorting::restfulQuickSort(state);
         BOOST_CHECK(iter_success);
         state = state_out;
         if (state.l == sorting::LEFT_I)
@@ -139,14 +140,14 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingLong)
         iter++;
     }
 
-    // ----
-    std::cout << iter << std::endl;
-    for (uint32_t i = 0; i < n; i++)
-    {
-        std::cout << state.arr[i] << " ";
-    }
-    std::cout << std::endl;
-    // ----
+    // // ----
+    // std::cout << iter << std::endl;
+    // for (uint32_t i = 0; i < n; i++)
+    // {
+    //     std::cout << state.arr[i] << " ";
+    // }
+    // std::cout << std::endl;
+    // // ----
 
     for (uint32_t i = 0; i < n; i++)
     {
@@ -156,7 +157,7 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingLong)
 
 BOOST_AUTO_TEST_CASE(TestIncrementalSortingMultiRefine)
 {
-    const uint32_t numRefines = 10;
+    const uint32_t numRefines = 4;
 
     auto updateComparator = [](const double& a, const double& b) {
         if (a < b)
@@ -173,12 +174,12 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingMultiRefine)
         }
     };
 
-    std::map<uint32_t, double> values  = {{0, 4.8}, {1, 10.0}, {2, 1.0}, {3, 2.5}, {4, 5.0}};
-    std::vector<uint32_t>      indices = {0, 1, 2, 3, 4};
-    std::vector<uint32_t>      stack(5, 0);
+    std::map<uint32_t, double> values  = {{0, 4.8}, {1, 10.0}, {2, 1.0}, {3, 2.5}, {4, 5.0}, {5, 7.5}};
+    std::vector<uint32_t>      indices = {0, 1, 2, 3, 4, 5}; // 2 3 0 4 5 1
+    std::vector<uint32_t>      stack(6, 0);
 
     sorting::QuickSortState state;
-    state.n     = 5;
+    state.n     = 6;
     state.arr   = indices;
     state.stack = stack;
 
@@ -188,7 +189,7 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingMultiRefine)
         const uint64_t maxIters = 50;
         while (!(state.top == std::numeric_limits<uint32_t>::max() && state.c != 0) && iter < maxIters)
         {
-            auto [iter_success, state_out] = sorting::restfulRandomizedQuickSort(state);
+            auto [iter_success, state_out] = sorting::restfulQuickSort(state);
             BOOST_CHECK(iter_success);
             state = state_out;
             if (state.l == sorting::LEFT_I)
@@ -203,6 +204,7 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingMultiRefine)
         }
 
         // ----
+        std::cout << iter << std::endl;
         for (auto e : state.arr)
         {
             std::cout << e << " ";
@@ -214,7 +216,8 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingMultiRefine)
         BOOST_CHECK_EQUAL(state.arr[1], 3);
         BOOST_CHECK_EQUAL(state.arr[2], 0);
         BOOST_CHECK_EQUAL(state.arr[3], 4);
-        BOOST_CHECK_EQUAL(state.arr[4], 1);
+        BOOST_CHECK_EQUAL(state.arr[4], 5);
+        BOOST_CHECK_EQUAL(state.arr[5], 1);
 
         sorting::QuickSortState state2;
         state2.n     = state.n;
