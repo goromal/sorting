@@ -15,6 +15,10 @@ target_include_directories(${PROJ_NAME} INTERFACE
 
 if (BUILD_TESTS)
     set(UNIT_TEST unit-tests)
+    
+    ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
+    find_package(Boost COMPONENTS log REQUIRED)
+
     add_executable(${UNIT_TEST}
         tests/MainTest.cpp
         tests/SortingTest.cpp
@@ -22,6 +26,8 @@ if (BUILD_TESTS)
     target_link_libraries(${UNIT_TEST}
         ${PROJ_NAME}
         boost_unit_test_framework
+        ${Boost_LOG_LIBRARY}
+
     )
     add_test(NAME ${UNIT_TEST} COMMAND ${UNIT_TEST})
 

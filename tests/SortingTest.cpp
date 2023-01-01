@@ -1,7 +1,11 @@
 #include <boost/test/unit_test.hpp>
-#include "sorting/Sorting.h"
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
 #include <limits>
 #include <map>
+
+#include "sorting/Sorting.h"
 
 BOOST_AUTO_TEST_SUITE(TestSorting)
 
@@ -140,14 +144,13 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingLong)
         iter++;
     }
 
-    // // ----
-    // std::cout << iter << std::endl;
-    // for (uint32_t i = 0; i < n; i++)
-    // {
-    //     std::cout << state.arr[i] << " ";
-    // }
-    // std::cout << std::endl;
-    // // ----
+    std::stringstream ss;
+    ss << "Long sort result: ";
+    for (uint32_t i = 0; i < n; i++)
+    {
+        ss << state.arr[i] << " ";
+    }
+    BOOST_LOG_TRIVIAL(debug) << ss.str();
 
     for (uint32_t i = 0; i < n; i++)
     {
@@ -203,14 +206,14 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingMultiRefine)
             iter++;
         }
 
-        // ----
-        std::cout << iter << std::endl;
-        for (auto e : state.arr)
-        {
-            std::cout << e << " ";
-        }
-        std::cout << std::endl;
-        // ----
+        // // ----
+        // std::cout << iter << std::endl;
+        // for (auto e : state.arr)
+        // {
+        //     std::cout << e << " ";
+        // }
+        // std::cout << std::endl;
+        // // ----
 
         BOOST_CHECK_EQUAL(state.arr[0], 2);
         BOOST_CHECK_EQUAL(state.arr[1], 3);
