@@ -27,7 +27,6 @@ if (BUILD_TESTS)
         ${PROJ_NAME}
         boost_unit_test_framework
         ${Boost_LOG_LIBRARY}
-
     )
     add_test(NAME ${UNIT_TEST} COMMAND ${UNIT_TEST})
 
