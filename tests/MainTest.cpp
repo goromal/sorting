@@ -3,13 +3,18 @@
 
 #include <iostream>
 #include <boost/test/unit_test.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+
+namespace logging = boost::log;
 
 /*! Global testing definitions. */
 struct GlobalFixture
 {
     GlobalFixture()
     {
-        // common function calls here
+        logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::info);
     }
 
     ~GlobalFixture() {}
