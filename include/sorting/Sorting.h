@@ -234,7 +234,7 @@ inline std::pair<bool, QuickSortState> restfulQuickSort(const QuickSortState& cu
     // Continue with partitioning
     if (state.l == LEFT_J)
     {
-        if ((state.c == LEFT_LESS || state.c == LEFT_EQUAL) && state.i < state.n - 1)
+        if (state.c == LEFT_LESS || state.c == LEFT_EQUAL)
         {
             state.i++;
             swap(state.arr, state.i, state.j);

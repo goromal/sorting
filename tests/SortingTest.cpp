@@ -4,6 +4,7 @@
 #include <boost/log/expressions.hpp>
 #include <limits>
 #include <map>
+#include <sstream>
 
 #include "sorting/Sorting.h"
 
@@ -195,25 +196,45 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingMultiRefine)
             auto [iter_success, state_out] = sorting::restfulQuickSort(state);
             BOOST_CHECK(iter_success);
             state = state_out;
+            std::string l;
             if (state.l == sorting::LEFT_I)
             {
                 state.c = updateComparator(values[state.arr[state.i]], values[state.arr[state.p]]);
+                l       = "i";
             }
             else if (state.l == sorting::LEFT_J)
             {
                 state.c = updateComparator(values[state.arr[state.j]], values[state.arr[state.p]]);
+                l       = "j";
             }
+            std::string c;
+            switch (state.c)
+            {
+            case sorting::LEFT_LESS:
+                c = "<";
+                break;
+            case sorting::LEFT_GREATER:
+                c = ">";
+                break;
+            case sorting::LEFT_EQUAL:
+                c = "=";
+                break;
+            default:
+                c = ":";
+                break;
+            }
+
+            std::stringstream ss;
+            ss << "iter " << iter << ": [p=" << state.p << ", i=" << state.i << ", j=" << state.j << ", l=" << l
+               << ", c=" << c << "] ";
+            for (uint32_t i = 0; i < state.n; i++)
+            {
+                ss << state.arr[i] << "(" << values[state.arr[i]] << ") ";
+            }
+            BOOST_LOG_TRIVIAL(debug) << ss.str();
+
             iter++;
         }
-
-        // // ----
-        // std::cout << iter << std::endl;
-        // for (auto e : state.arr)
-        // {
-        //     std::cout << e << " ";
-        // }
-        // std::cout << std::endl;
-        // // ----
 
         BOOST_CHECK_EQUAL(state.arr[0], 2);
         BOOST_CHECK_EQUAL(state.arr[1], 3);
