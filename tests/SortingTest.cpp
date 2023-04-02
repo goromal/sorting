@@ -95,6 +95,52 @@ BOOST_AUTO_TEST_CASE(TestIncrementalSortingShort)
     BOOST_CHECK_EQUAL(state.arr[4], 1);
 }
 
+BOOST_AUTO_TEST_CASE(TestIncrementalSortingTrivial)
+{
+    auto updateComparator = [](const uint32_t& a, const uint32_t& b) {
+        if (a < b)
+        {
+            return sorting::LEFT_LESS;
+        }
+        else if (a > b)
+        {
+            return sorting::LEFT_GREATER;
+        }
+        else
+        {
+            return sorting::LEFT_EQUAL;
+        }
+    };
+
+    sorting::QuickSortState state;
+    state.n     = 7;
+    state.arr   = {1, 5, 3, 4, 2, 6, 7};
+    state.stack = std::vector<uint32_t>(7, 0);
+
+    uint64_t       iter     = 0;
+    const uint64_t maxIters = 50;
+    while (!(state.top == std::numeric_limits<uint32_t>::max() && state.c != 0) && iter < maxIters)
+    {
+        auto [iter_success, state_out] = sorting::restfulQuickSort(state);
+        BOOST_CHECK(iter_success);
+        state = state_out;
+        if (state.l == sorting::LEFT_I)
+        {
+            state.c = updateComparator(state.arr[state.i], state.arr[state.p]);
+        }
+        else if (state.l == sorting::LEFT_J)
+        {
+            state.c = updateComparator(state.arr[state.j], state.arr[state.p]);
+        }
+        iter++;
+    }
+
+    for (uint32_t i = 0; i < 7; i++)
+    {
+        BOOST_CHECK_EQUAL(state.arr[i], i + 1);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(TestIncrementalSortingLong)
 {
     auto updateComparator = [](const uint32_t& a, const uint32_t& b) {
